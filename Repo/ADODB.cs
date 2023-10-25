@@ -16,7 +16,8 @@ namespace TelegramBot.Repo
 {
     public static class ADODB
     {
-		static string SqlConnectionString = ConfigurationManager.AppSettings["SqlConnect"];
+        static string SqlConnectionString = ConfigurationManager.AppSettings["SqlConnect"];
+
         public static List<User> GetUsers()
         {
             var users = new List<User>();
@@ -73,9 +74,10 @@ namespace TelegramBot.Repo
             }
             return userRole;
         }
-		public static string GetUserSpecialict(long chatId)
-		{
-			string userSpecialict = null;
+
+        public static string GetUserSpecialict(long chatId)
+        {
+            string userSpecialict = null;
             using (var conn = new NpgsqlConnection(SqlConnectionString))
             {
                 string sql = @"select specialict from requests where chat_id = @chatId";
@@ -96,14 +98,15 @@ namespace TelegramBot.Repo
                 }
             }
             return userSpecialict;
-		}
+        }
 
         public static string GetRequestUser(long chatId)
         {
             string userRequests = null;
             using (var conn = new NpgsqlConnection(SqlConnectionString))
             {
-                string sql = @"select number,specialist,description from requests where chat_id = @chatId";
+                string sql =
+                    @"select number,specialist,description from requests where chat_id = @chatId";
                 conn.Open();
                 using (var command = new NpgsqlCommand(sql, conn))
                 {
@@ -155,6 +158,20 @@ namespace TelegramBot.Repo
                 {
                     command.Parameters.AddWithValue("@specialist", request.Specialist);
                     command.Parameters.AddWithValue("@description", request.Description);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void DeleteUser(long chatId)
+        {
+            using (var conn = new NpgsqlConnection(SqlConnectionString))
+            {
+                string sql = @"delete from users where chat_id = @chatId";
+                conn.Open();
+                using (var command = new NpgsqlCommand(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@chatId", chatId);
                     command.ExecuteNonQuery();
                 }
             }

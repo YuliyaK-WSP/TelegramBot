@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace TelegramBot.MHandlers
         static string phoneNumber;
         static string city;
         static string street;
-        static UserRoles userRole;
+        static UserRoles userRole = UserRoles.Default;
         static string houseNumber;
 
         public static async void HandleCallbackQuery(object sender, CallbackQueryEventArgs e)
@@ -40,16 +41,14 @@ namespace TelegramBot.MHandlers
                 case "default":
                     userRole = UserRoles.Default;
                     break;
+                
             }
-            await Handlers._botClient.SendTextMessageAsync(
-                chatId,
-                "Введите имя пользователя:"
-            );
+            await Handlers._botClient.SendTextMessageAsync(chatId, "Введите имя:");
             Handlers._botClient.OnCallbackQuery -= HandleCallbackQuery;
             Handlers._botClient.OnMessage += HandleFirstNameInput;
         }
 
-        private static async void HandleFirstNameInput(object sender, MessageEventArgs e)
+        public static async void HandleFirstNameInput(object sender, MessageEventArgs e)
         {
             if (e.Message.Type == MessageType.Text)
             {
@@ -65,10 +64,7 @@ namespace TelegramBot.MHandlers
                 }
                 else
                 {
-                    await Handlers._botClient.SendTextMessageAsync(
-                        chatId,
-                        "Введите фамилию пользователя:"
-                    );
+                    await Handlers._botClient.SendTextMessageAsync(chatId, "Введите фамилию:");
                     Handlers._botClient.OnMessage -= HandleFirstNameInput;
                     Handlers._botClient.OnMessage += HandleLastNameInput;
                 }
@@ -83,7 +79,7 @@ namespace TelegramBot.MHandlers
                 lastName = e.Message.Text;
                 await Handlers._botClient.SendTextMessageAsync(
                     chatId,
-                    "Введите телефон пользователя в формате +7(000)-000-00:"
+                    "Введите телефона для связи"
                 );
                 Handlers._botClient.OnMessage -= HandleLastNameInput;
                 Handlers._botClient.OnMessage += HandlePhoneNumberInput;
@@ -96,10 +92,7 @@ namespace TelegramBot.MHandlers
             {
                 var chatId = e.Message.Chat.Id;
                 phoneNumber = e.Message.Text;
-                await Handlers._botClient.SendTextMessageAsync(
-                    chatId,
-                    "Введите город пользователя:"
-                );
+                await Handlers._botClient.SendTextMessageAsync(chatId, "Введите город:");
                 Handlers._botClient.OnMessage -= HandlePhoneNumberInput;
                 Handlers._botClient.OnMessage += HandleCityInput;
             }
@@ -111,10 +104,7 @@ namespace TelegramBot.MHandlers
             {
                 var chatId = e.Message.Chat.Id;
                 city = e.Message.Text;
-                await Handlers._botClient.SendTextMessageAsync(
-                    chatId,
-                    "Введите улицу пользователя:"
-                );
+                await Handlers._botClient.SendTextMessageAsync(chatId, "Введите улицу:");
                 Handlers._botClient.OnMessage -= HandleCityInput;
                 Handlers._botClient.OnMessage += HandleStreetInput;
             }
@@ -126,10 +116,7 @@ namespace TelegramBot.MHandlers
             {
                 var chatId = e.Message.Chat.Id;
                 street = e.Message.Text;
-                await Handlers._botClient.SendTextMessageAsync(
-                    chatId,
-                    "Введите номер дома пользователя:"
-                );
+                await Handlers._botClient.SendTextMessageAsync(chatId, "Введите номер дома:");
                 Handlers._botClient.OnMessage -= HandleStreetInput;
                 Handlers._botClient.OnMessage += HandleHouseNumberInput;
             }
@@ -182,9 +169,10 @@ namespace TelegramBot.MHandlers
                     HouseNumber = houseNumber
                 };
                 ADODB.AddUsers(newUser, chatId);
+				var buttonsUser = Handlers.GetButtonDefaultUser();
                 await Handlers._botClient.SendTextMessageAsync(
                     chatId,
-                    "Пользователь успешно добавлен ✅"
+                    "Ваша регистрация завершена ✅ Если Вы Исполнитель, дождитесь подтверждения от Администратора",replyMarkup: buttonsUser
                 );
                 Handlers._botClient.OnMessage -= HandleHouseNumberInput;
                 Handlers._botClient.OnMessage += Handlers.Bot_OnMessageHandler;
