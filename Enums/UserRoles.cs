@@ -1,4 +1,4 @@
-namespace TelegramBot.Models
+namespace TelegramBot.Enums
 {
     public enum UserRoles
     {

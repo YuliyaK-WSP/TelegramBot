@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TelegramBot;
+using TelegramBot.Models;
+using TelegramBot.Enums;
 using System.Threading.Tasks;
 
 namespace TelegramBot.Models

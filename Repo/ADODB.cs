@@ -6,6 +6,7 @@ using System.Data;
 using System.Configuration;
 using System;
 using TelegramBot.Models;
+using TelegramBot.Enums;
 using Npgsql;
 using System.Collections.Generic;
 using System.Linq;

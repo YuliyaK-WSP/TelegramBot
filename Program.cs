@@ -7,6 +7,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Repo;
 using TelegramBot.Models;
+using TelegramBot.Enums;
 using TelegramBot.MHandlers;
 
 namespace TelegramBot

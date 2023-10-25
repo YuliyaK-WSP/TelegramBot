@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.Types.Enums;
 using TelegramBot.Models;
+using TelegramBot.Enums;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using TelegramBot.Repo;
