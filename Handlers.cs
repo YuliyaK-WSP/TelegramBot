@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using System;
 using System.Text;
 using Telegram.Bot;
@@ -36,6 +37,8 @@ namespace TelegramBot
                                 "Выберите действие:",
                                 replyMarkup: buttons
                             );
+							Handlers._botClient.OnMessage -= Bot_OnMessageHandler;
+                    		Handlers._botClient.OnMessage += Admin_OnMessageHandler;
                         }
                         else if (userRole == "executor")
                         {
@@ -54,6 +57,8 @@ namespace TelegramBot
                                 "Выберите действие:",
                                 replyMarkup: buttonsUser
                             );
+							Handlers._botClient.OnMessage -= Bot_OnMessageHandler;
+                    		Handlers._botClient.OnMessage += Default_OnMessageHandler;
                         }
                         else
                         {
@@ -63,46 +68,80 @@ namespace TelegramBot
                                 "Выберите действие:",
                                 replyMarkup: buttonsUser
                             );
+							Handlers._botClient.OnMessage -= Bot_OnMessageHandler;
+                    		Handlers._botClient.OnMessage += Register_OnMessageHandler;
                         }
                         break;
-                    case "добавить пользователя":
+                    /*
+                    
+                    
+                    
+                    */
+                }
+            }
+        }
+
+		public static async void Admin_OnMessageHandler(object sender, MessageEventArgs e)
+        {
+			var chatId = e.Message.Chat.Id;
+                var message = e.Message.Text.ToLower();
+                switch (message)
+                {
+					case "добавить пользователя":
                         var buttonUserRole = GetButtonRoleUser();
                         await _botClient.SendTextMessageAsync(
                             chatId,
                             "Выберите роль пользователя в системе",
                             replyMarkup: buttonUserRole
                         );
-                        _botClient.OnMessage -= Bot_OnMessageHandler;
+                        _botClient.OnMessage -= Admin_OnMessageHandler;
                         _botClient.OnCallbackQuery += UHandlers.HandleCallbackQuery;
                         break;
-                    case "регистрация":
-                        await _botClient.SendTextMessageAsync(chatId, "Введите имя:");
-                        _botClient.OnMessage -= Bot_OnMessageHandler;
-                        _botClient.OnMessage += UHandlers.HandleFirstNameInput;
-                        break;
-                    case "пользователи":
+					case "пользователи":
                         ShowUsersCards(_botClient, chatId);
                         break;
-                    case "оставить заявку":
-                        var userSpecialistButton = GetButtonSpecialist();
-                        await _botClient.SendTextMessageAsync(
-                            chatId,
-                            "Выберите специалиста",
-                            replyMarkup: userSpecialistButton
-                        );
-                        _botClient.OnMessage -= Bot_OnMessageHandler;
-                        _botClient.OnCallbackQuery += RHandlers.HandleCallbackQuery;
-                        break;
-                }
-            }
-        }
+				}
+		}
+
+		public static async void Default_OnMessageHandler(object sender, MessageEventArgs e)
+        {
+			var chatId = e.Message.Chat.Id;
+			var message = e.Message.Text.ToLower();
+			switch (message)
+			{
+				case "оставить заявку":
+					var userSpecialistButton = GetButtonSpecialist();
+					await _botClient.SendTextMessageAsync(
+						chatId,
+						"Выберите специалиста",
+						replyMarkup: userSpecialistButton
+					);
+					_botClient.OnMessage -= Bot_OnMessageHandler;
+					_botClient.OnCallbackQuery += RHandlers.HandleCallbackQuery;
+					break;
+			}
+		}
+		
+		public static async void Register_OnMessageHandler(object sender, MessageEventArgs e)
+        {
+			var chatId = e.Message.Chat.Id;
+			var message = e.Message.Text.ToLower();
+			switch (message)
+			{
+				case "регистрация":
+					await _botClient.SendTextMessageAsync(chatId, "Введите имя:");
+					_botClient.OnMessage -= Register_OnMessageHandler;
+					_botClient.OnMessage += UHandlers.HandleFirstNameInput;
+					break;
+			}
+		}
 
         public static async void ShowUsersCards(TelegramBotClient botClient, long chatId)
         {
             var users = ADODB.GetUsers();
             foreach (var user in users)
             {
-                var userManipulationButton = GetButtonManipulationUser();
+                var userManipulationButton = GetButtonManipulationUser(user.Id);
                 var userInfo =
                     $"Имя:{user.FirstName}\nФамилия:{user.LastName}\nОтчество{user.PhoneNumber}";
                 await _botClient.SendTextMessageAsync(
@@ -111,6 +150,7 @@ namespace TelegramBot
                     replyMarkup: userManipulationButton
                 );
             }
+			_botClient.OnCallbackQuery += UHandlers.HandleManipulationUsersCallbackQuery;
         }
 
         public static InlineKeyboardMarkup GetButtonRoleUser()
@@ -155,7 +195,11 @@ namespace TelegramBot
                         new KeyboardButton("Добавить пользователя"),
                         new KeyboardButton("Пользователи")
                     },
-                    new[] { new KeyboardButton("Заявки"), new KeyboardButton("Button 4") }
+                    new[] 
+					{ 
+						new KeyboardButton("Заявки"),
+						new KeyboardButton("Button 4")
+					}
                 }
             };
             return replyMarkup;
@@ -206,7 +250,7 @@ namespace TelegramBot
             return replyMarkup;
         }
 
-        private static InlineKeyboardMarkup GetButtonManipulationUser()
+        private static InlineKeyboardMarkup GetButtonManipulationUser(int userId)
         {
             var replyMarkup = new InlineKeyboardMarkup(
                 new[]
@@ -214,7 +258,7 @@ namespace TelegramBot
                     new[]
                     {
                         InlineKeyboardButton.WithCallbackData("Редактировать"),
-                        InlineKeyboardButton.WithCallbackData("Удалить")
+                        InlineKeyboardButton.WithCallbackData("Удалить", $"delete {userId}")
                     }
                 }
             );

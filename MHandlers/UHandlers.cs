@@ -41,10 +41,42 @@ namespace TelegramBot.MHandlers
                 case "default":
                     userRole = UserRoles.Default;
                     break;
-                
             }
-            await Handlers._botClient.SendTextMessageAsync(chatId, "Введите имя:");
+            //await Handlers._botClient.SendTextMessageAsync(chatId, "Введите имя:");
             Handlers._botClient.OnCallbackQuery -= HandleCallbackQuery;
+            Handlers._botClient.OnMessage += HandleFirstNameInput;
+        }
+
+        public static async void HandleManipulationUsersCallbackQuery(
+            object sender,
+            CallbackQueryEventArgs e
+        )
+        {
+            var callbackQuery = e.CallbackQuery;
+            var chatId = callbackQuery.Message.Chat.Id;
+            var callbackData = callbackQuery.Data;
+
+            // Обработка нажатия на кнопку
+            /*switch (callbackData)
+            {
+                case "Удалить":
+                    ADODB.DeleteUser(chatId);
+                    await Handlers._botClient.SendTextMessageAsync(
+                        chatId,
+                        "Пользователь был успешно удален ❌"
+                    );
+                    break;
+            }*/
+            if (callbackData.StartsWith("delete"))
+            {
+                var userId = int.Parse(callbackData.Split(" ")[1]);
+                ADODB.DeleteUser(userId);
+                await Handlers._botClient.SendTextMessageAsync(
+                    chatId,
+                    $"Пользователь с ID {userId} был успешно удален ❌"
+                );
+            }
+            Handlers._botClient.OnCallbackQuery -= HandleManipulationUsersCallbackQuery;
             Handlers._botClient.OnMessage += HandleFirstNameInput;
         }
 
@@ -169,13 +201,14 @@ namespace TelegramBot.MHandlers
                     HouseNumber = houseNumber
                 };
                 ADODB.AddUsers(newUser, chatId);
-				var buttonsUser = Handlers.GetButtonDefaultUser();
+                var buttonsUser = Handlers.GetButtonDefaultUser();
                 await Handlers._botClient.SendTextMessageAsync(
                     chatId,
-                    "Ваша регистрация завершена ✅ Если Вы Исполнитель, дождитесь подтверждения от Администратора",replyMarkup: buttonsUser
+                    "Ваша регистрация завершена ✅ Если Вы Исполнитель, дождитесь подтверждения от Администратора",
+                    replyMarkup: buttonsUser
                 );
                 Handlers._botClient.OnMessage -= HandleHouseNumberInput;
-                Handlers._botClient.OnMessage += Handlers.Bot_OnMessageHandler;
+                Handlers._botClient.OnMessage += Handlers.Default_OnMessageHandler;
             }
         }
     }

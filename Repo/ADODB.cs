@@ -163,15 +163,15 @@ namespace TelegramBot.Repo
             }
         }
 
-        public static void DeleteUser(long chatId)
+        public static void DeleteUser(int userId)
         {
             using (var conn = new NpgsqlConnection(SqlConnectionString))
             {
-                string sql = @"delete from users where chat_id = @chatId";
+                string sql = @"delete from users where id = @userId";
                 conn.Open();
                 using (var command = new NpgsqlCommand(sql, conn))
                 {
-                    command.Parameters.AddWithValue("@chatId", chatId);
+                    command.Parameters.AddWithValue("@userId", userId);
                     command.ExecuteNonQuery();
                 }
             }
