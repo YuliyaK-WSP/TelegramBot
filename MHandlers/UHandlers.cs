@@ -56,17 +56,6 @@ namespace TelegramBot.MHandlers
             var chatId = callbackQuery.Message.Chat.Id;
             var callbackData = callbackQuery.Data;
 
-            // Обработка нажатия на кнопку
-            /*switch (callbackData)
-            {
-                case "Удалить":
-                    ADODB.DeleteUser(chatId);
-                    await Handlers._botClient.SendTextMessageAsync(
-                        chatId,
-                        "Пользователь был успешно удален ❌"
-                    );
-                    break;
-            }*/
             if (callbackData.StartsWith("delete"))
             {
                 var userId = int.Parse(callbackData.Split(" ")[1]);

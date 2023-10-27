@@ -68,6 +68,36 @@ namespace TelegramBot.MHandlers
             }
         }
 
+        public static async void HandleManipulationRequestCallbackQuery(
+            object sender,
+            CallbackQueryEventArgs e
+        )
+        {
+            var callbackQuery = e.CallbackQuery;
+            var chatId = callbackQuery.Message.Chat.Id;
+            var callbackData = callbackQuery.Data;
+            // Обработка нажатия на кнопку
+            if (callbackData.StartsWith("inWork"))
+            {
+                var requestId = int.Parse(callbackData.Split(" ")[1]);
+                bool inWork = true; // Инициализация переменной
+                var buttonText = inWork ? "В работе" : "В работу";
+                var buttonMarkup = Handlers.GetButtonManipulationRequest(requestId, inWork);
+                await Handlers._botClient.EditMessageReplyMarkupAsync(
+                    chatId,
+                    callbackQuery.Message.MessageId,
+                    replyMarkup: buttonMarkup
+                );
+                await Handlers._botClient.SendTextMessageAsync(
+                    chatId,
+                    $"Нажата кнопка \"{buttonText}\" для заявки с ID {requestId}"
+                );
+            }
+
+            Handlers._botClient.OnCallbackQuery -= HandleManipulationRequestCallbackQuery;
+            Handlers._botClient.OnMessage += UHandlers.HandleFirstNameInput;
+        }
+
         public static async void HandleRequestDescription(object sender, MessageEventArgs e)
         {
             if (e.Message.Type == MessageType.Text)
@@ -77,14 +107,17 @@ namespace TelegramBot.MHandlers
 
                 var request = new TelegramBot.Models.Request
                 {
-                    Specialist = specialist.ToString(),
+                    Specialist = specialist,
                     Description = description
                 };
 
                 // Добавляем новую заявку
                 ADODB.AddRequestUser(request);
 
-                await Handlers._botClient.SendTextMessageAsync(chatId, "Ваша заявка успешно добавлена ✅");
+                await Handlers._botClient.SendTextMessageAsync(
+                    chatId,
+                    "Ваша заявка успешно добавлена ✅"
+                );
 
                 Handlers._botClient.OnMessage -= HandleRequestDescription;
                 Handlers._botClient.OnMessage += Handlers.Bot_OnMessageHandler;
